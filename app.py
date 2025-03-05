@@ -13,7 +13,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 
 # Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI()
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
 CORS(app)
@@ -48,13 +48,13 @@ def predict():
 
         # Step 1: Ask ChatGPT for an analysis
         try:
-    response = client.chat.completions.create(  # ✅ Properly indented
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
-    )
-    ai_result = response.choices[0].message.content  # ✅ Correct indentation
-except Exception as e:
-    return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500  
+            response = client.chat.completions.create( 
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
+            )
+            ai_result = response.choices[0].message.content  
+        except Exception as e:
+            return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500  
 
         # Step 2: Generate a fake accuracy score (for demo purposes)
         accuracy = round(random.uniform(50, 99), 2)  # Fake accuracy between 50% and 99%
