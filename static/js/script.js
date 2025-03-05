@@ -6,10 +6,14 @@ function checkNews() {
         return;
     }
 
-    fetch("/predict", {
-        method: "POST",
-        body: new URLSearchParams({ "news_text": newsText }),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    fetch("https://uday-qb88.onrender.com/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "news_text=NASA plans to launch a new Mars rover in 2025."
+})
+.then(res => res.json())
+.then(data => console.log(data));
+
     })
     .then(response => response.json())
     .then(data => {
