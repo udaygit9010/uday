@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, request, jsonify, render_template, url_for
+from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
