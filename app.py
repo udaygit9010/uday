@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
@@ -64,6 +64,10 @@ def predict():
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+# Route to serve static files
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
-
