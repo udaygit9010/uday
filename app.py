@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
@@ -15,14 +15,20 @@ SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 app = Flask(__name__)
 CORS(app)
 
-# Dummy AI model for demonstration
-def fake_ai_model(news_text):
-    return {
-        "analysis": "This news appears to be real." if "NASA" in news_text else "This news might be fake.",
-        "links": search_google_news(news_text)
-    }
+# 🔹 Load your AI model (Replace with your real model)
+class FakeNewsModel:
+    def predict(self, text):
+        # Dummy logic: Assume long text is real, short text is fake (Replace with actual ML model)
+        if len(text) > 20:
+            return {"analysis": "This news appears to be real.", "is_fake": False}
+        else:
+            return {"analysis": "This news might be fake.", "is_fake": True}
 
-# Function to search Google News
+# Initialize the model
+model = FakeNewsModel()
+
+
+# 🔹 Function to search Google News
 def search_google_news(query):
     url = f"https://www.googleapis.com/customsearch/v1?q={query}&cx={SEARCH_ENGINE_ID}&key={GOOGLE_API_KEY}"
     response = requests.get(url)
@@ -32,11 +38,8 @@ def search_google_news(query):
         news_links = []
         if "items" in results:
             for item in results["items"]:
-                # Extract the domain name (source)
                 parsed_url = urlparse(item["link"])
                 source = parsed_url.netloc.replace("www.", "")
-
-                # Generate a fake accuracy score for demonstration
                 accuracy = round(random.uniform(50, 99), 2)
 
                 news_links.append({
@@ -49,9 +52,11 @@ def search_google_news(query):
     except Exception as e:
         return {"error": str(e)}
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -61,25 +66,25 @@ def predict():
 
         print("Input News:", news_text)  # Debug Input
 
-        predicted_result = fake_ai_model(news_text)  # Simulated AI Model
-        print("Model Output:", predicted_result)  # Debug Output
+        # 🔹 AI Model Prediction
+        predicted_result = model.predict(news_text)
 
+        # 🔹 Fetch Trusted News Sources
+        trusted_sources = search_google_news(news_text)
+
+        # 🔹 Response Data
         response_data = {
             "AI_Analysis": predicted_result["analysis"],
-            "Trusted_News_Links": predicted_result["links"]
+            "Trusted_News_Links": trusted_sources
         }
 
         print("Response JSON:", json.dumps(response_data, indent=4))  # Debug Response
         return jsonify(response_data)
-    
+
     except Exception as e:
         print("Server Error:", str(e))  # Print error in logs
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
-# Route to serve static files
-@app.route('/static/<path:filename>')
-def static_files(filename):
-    return send_from_directory('static', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
