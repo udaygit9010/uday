@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
@@ -12,7 +12,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 
 # Function to search Google News
@@ -49,20 +49,25 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json()  # Expect JSON input
-        if not data or 'news_text' not in data:
+        data = request.get_json()
+        if not data or "news_text" not in data:
             return jsonify({"error": "No news text provided"}), 400
-        
-        news_text = data['news_text']
 
-        # Search Google News for verification
-        news_results = search_google_news(news_text[:50])
+        news_text = data["news_text"]
+        
+        # Fake AI Analysis (Replace with your AI model)
+        ai_result = "This news appears to be real."
+        news_results = [
+            {"title": "NASA Confirms Water on Mars", "link": "https://www.bbc.com/news", "accuracy": "92%", "source": "BBC News"}
+        ]
 
         return jsonify({
-            "News_Verification": news_results if news_results else "No matching news found"
+            "AI_Analysis": ai_result,
+            "Trusted_News_Links": news_results
         })
-
+    
     except Exception as e:
+        print("Server Error:", str(e))  # Print error in logs
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # Route to serve static files
