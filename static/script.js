@@ -8,10 +8,11 @@ function checkNews() {
         return;
     }
 
+    // Show loader
     loader.style.display = "block";
     resultDiv.innerHTML = "";
 
-    fetch("https://your-app.onrender.com/predict", {  // Change to your actual URL
+    fetch("/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ news_text: newsText })
@@ -25,24 +26,36 @@ function checkNews() {
             return;
         }
 
-        let aiAnalysis = data.AI_Analysis || "No analysis available.";
-        let newsResults = data.Trusted_News_Links || [];
+        let analysis = `<p><strong>AI Analysis:</strong> ${data.AI_Analysis}</p>`;
 
-        let tableHTML = `<h3>${aiAnalysis}</h3><br><table border="1">
-                    <tr><th>Title</th><th>Source</th><th>Accuracy</th><th>Verdict</th></tr>`;
+        let newsResults = data.Trusted_News_Links;
+        if (!newsResults || newsResults.length === 0) {
+            resultDiv.innerHTML = `${analysis} <p>No matching news found.</p>`;
+            return;
+        }
+
+        let tableHTML = `
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Title</th>
+                        <th>Source</th>
+                        <th>Accuracy</th>
+                        <th>Link</th>
+                    </tr>`;
 
         newsResults.forEach(news => {
-            let verdict = parseFloat(news.accuracy || 50) > 75 ? "Real ✅" : "Fake ❌";
-            tableHTML += `<tr>
-                    <td><a href="${news.link}" target="_blank">${news.title}</a></td>
-                    <td>${news.source || "Unknown"}</td>
-                    <td>${news.accuracy || "N/A"}</td>
-                    <td>${verdict}</td>
+            tableHTML += `
+                <tr>
+                    <td>${news.title}</td>
+                    <td>${news.source}</td>
+                    <td>${news.accuracy}</td>
+                    <td><a href="${news.link}" target="_blank">Read More</a></td>
                 </tr>`;
         });
 
-        tableHTML += `</table>`;
-        resultDiv.innerHTML = tableHTML;
+        tableHTML += `</table></div>`;
+        resultDiv.innerHTML = `${analysis} ${tableHTML}`;
     })
     .catch(error => {
         loader.style.display = "none";
