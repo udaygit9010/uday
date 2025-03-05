@@ -36,32 +36,38 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    news_text = request.form.get('news_text')
-
-    if not news_text:
-        return jsonify({"error": "No news text provided"}), 400
-
-    # Step 1: Ask ChatGPT for an analysis
     try:
-        ai_response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
-        )
-        ai_result = ai_response.get("choices", [{}])[0].get("message", {}).get("content", "Error processing AI response")
+        data = request.get_json()  # Expect JSON input
+        if not data or 'news_text' not in data:
+            return jsonify({"error": "No news text provided"}), 400
+        
+        news_text = data['news_text']
+
+        # Step 1: Ask ChatGPT for an analysis
+        try:
+            ai_response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
+            )
+            ai_result = ai_response.get("choices", [{}])[0].get("message", {}).get("content", "Error processing AI response")
+        except Exception as e:
+            return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500
+
+        # Step 2: Generate a fake accuracy score (for demo purposes)
+        accuracy = round(random.uniform(50, 99), 2)  # Fake accuracy between 50% and 99%
+
+        # Step 3: Search Google News for verification
+        news_results = search_google_news(news_text[:50])
+
+        return jsonify({
+            "AI_Analysis": ai_result,
+            "Accuracy": f"{accuracy}%",
+            "Trusted_News_Links": news_results if news_results else "No matching news found"
+        })
+
     except Exception as e:
-        return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500
-
-    # Step 2: Generate a fake accuracy score (for demo purposes)
-    accuracy = round(random.uniform(50, 99), 2)  # Fake accuracy between 50% and 99%
-
-    # Step 3: Search Google News for verification
-    news_results = search_google_news(news_text[:50])
-
-    return jsonify({
-        "AI_Analysis": ai_result,
-        "Accuracy": f"{accuracy}%",
-        "Trusted_News_Links": news_results if news_results else "No matching news found"
-    })
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
