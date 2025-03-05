@@ -48,23 +48,22 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.get_json()
-        if not data or "news_text" not in data:
-            return jsonify({"error": "No news text provided"}), 400
+    data = request.json
+    news_text = data.get("news_text", "")
 
-        news_text = data["news_text"]
-        
-        # Fake AI Analysis (Replace with your AI model)
-        ai_result = "This news appears to be real."
-        news_results = [
-            {"title": "NASA Confirms Water on Mars", "link": "https://www.bbc.com/news", "accuracy": "92%", "source": "BBC News"}
-        ]
+    print("Input News:", news_text)  # Debug Input
 
-        return jsonify({
-            "AI_Analysis": ai_result,
-            "Trusted_News_Links": news_results
-        })
+    predicted_result = model.predict(news_text)  # Ensure AI Model is working
+    print("Model Output:", predicted_result)  # Debug Output
+
+    response_data = {
+        "AI_Analysis": predicted_result["analysis"],
+        "Trusted_News_Links": predicted_result["links"]
+    }
+
+    print("Response JSON:", json.dumps(response_data, indent=4))  # Debug Response
+    return jsonify(response_data)
+
     
     except Exception as e:
         print("Server Error:", str(e))  # Print error in logs
