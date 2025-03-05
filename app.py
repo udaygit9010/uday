@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, url_for
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
@@ -11,7 +11,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 
-app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # Function to search Google News
@@ -70,4 +70,4 @@ def static_files(filename):
     return send_from_directory('static', filename)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    app.run(debug=True)
