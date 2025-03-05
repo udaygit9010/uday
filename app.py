@@ -48,10 +48,14 @@ def predict():
 
         # Step 1: Ask ChatGPT for an analysis
         try:
-            ai_response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
-            )
+            ai_response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a fact-checking assistant."},
+        {"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}
+    ]
+)
+
             ai_result = ai_response.choices[0].message.content  # Extract AI response
         except Exception as e:
             return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500
