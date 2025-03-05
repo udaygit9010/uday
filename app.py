@@ -1,10 +1,11 @@
 import requests
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import random  # For generating a fake accuracy score
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+import json
 
 # Load API keys from .env file
 load_dotenv()
@@ -14,6 +15,12 @@ SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 app = Flask(__name__)
 CORS(app)
 
+# Dummy AI model for demonstration
+def fake_ai_model(news_text):
+    return {
+        "analysis": "This news appears to be real." if "NASA" in news_text else "This news might be fake.",
+        "links": search_google_news(news_text)
+    }
 
 # Function to search Google News
 def search_google_news(query):
@@ -48,22 +55,22 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    news_text = data.get("news_text", "")
+    try:
+        data = request.json
+        news_text = data.get("news_text", "")
 
-    print("Input News:", news_text)  # Debug Input
+        print("Input News:", news_text)  # Debug Input
 
-    predicted_result = model.predict(news_text)  # Ensure AI Model is working
-    print("Model Output:", predicted_result)  # Debug Output
+        predicted_result = fake_ai_model(news_text)  # Simulated AI Model
+        print("Model Output:", predicted_result)  # Debug Output
 
-    response_data = {
-        "AI_Analysis": predicted_result["analysis"],
-        "Trusted_News_Links": predicted_result["links"]
-    }
+        response_data = {
+            "AI_Analysis": predicted_result["analysis"],
+            "Trusted_News_Links": predicted_result["links"]
+        }
 
-    print("Response JSON:", json.dumps(response_data, indent=4))  # Debug Response
-    return jsonify(response_data)
-
+        print("Response JSON:", json.dumps(response_data, indent=4))  # Debug Response
+        return jsonify(response_data)
     
     except Exception as e:
         print("Server Error:", str(e))  # Print error in logs
