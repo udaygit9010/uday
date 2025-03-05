@@ -12,11 +12,12 @@ function checkNews() {
     loader.style.display = "block";
     resultDiv.innerHTML = "";
 
-    fetch("/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ news_text: newsText })
-    })
+    fetch("https://news-detector-vnz4.onrender.com//predict", { 
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ news_text: newsText })
+})
+
     .then(response => response.json())
     .then(data => {
         loader.style.display = "none";
