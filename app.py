@@ -8,9 +8,12 @@ from dotenv import load_dotenv
 
 # Load API keys from .env file
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
+
+# Initialize OpenAI client
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
 CORS(app)
@@ -45,11 +48,11 @@ def predict():
 
         # Step 1: Ask ChatGPT for an analysis
         try:
-            ai_response = openai.ChatCompletion.create(
+            ai_response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": f"Analyze this news and tell me if it's fake or real: {news_text}"}]
             )
-            ai_result = ai_response.get("choices", [{}])[0].get("message", {}).get("content", "Error processing AI response")
+            ai_result = ai_response.choices[0].message.content  # Extract AI response
         except Exception as e:
             return jsonify({"error": f"AI analysis failed: {str(e)}"}), 500
 
@@ -70,4 +73,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
