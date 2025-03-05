@@ -8,8 +8,8 @@ function checkNews() {
         return;
     }
 
-    // Show loader
     loader.style.display = "block";
+    resultDiv.style.display = "none";
     resultDiv.innerHTML = "";
 
     fetch("/predict", {
@@ -20,6 +20,7 @@ function checkNews() {
     .then(response => response.json())
     .then(data => {
         loader.style.display = "none";
+        resultDiv.style.display = "block";
 
         if (data.error) {
             resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
@@ -59,6 +60,7 @@ function checkNews() {
     })
     .catch(error => {
         loader.style.display = "none";
+        resultDiv.style.display = "block";
         resultDiv.innerHTML = `<p style="color: red;">Error fetching results: ${error.message}</p>`;
     });
 }
